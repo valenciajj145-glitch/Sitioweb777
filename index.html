@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador Avanzado de Porcentaje Máster</title>
+  <title>Contador Avanzado de Porcentaje</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -52,13 +52,14 @@
       border-radius: 20px 0 0 20px;
       transition: width 0.05s linear, background-color 0.2s linear;
     }
-    .indicator {
+    .indicator, .indicator-label {
       position: absolute;
-      top: 0;
-      height: 100%;
-      width: 3px;
-      background: red;
+      top: -25px;
+      text-align: center;
+      color: red;
+      font-weight: bold;
       pointer-events: none;
+      font-size: 0.9em;
     }
     .tooltip {
       position: absolute;
@@ -108,7 +109,7 @@
   </style>
 </head>
 <body>
-  <h1>Contador Avanzado de Porcentaje Máster</h1>
+  <h1>Contador Avanzado de Porcentaje</h1>
 
   <div class="time-box">
     <p>Total: <span id="total"></span></p>
@@ -135,7 +136,7 @@
   </div>
 
   <script>
-    const startDate = new Date('2025-08-21T00:00:00-05:00'); // Colombia UTC-5
+    const startDate = new Date('2025-08-21T00:00:00-05:00');
     const endDate = new Date('2025-10-01T20:00:00-05:00');
 
     let indicators = [];
@@ -146,14 +147,13 @@
       const minutes = Math.floor((ms % (1000*60*60)) / (1000*60));
       const seconds = Math.floor((ms % (1000*60)) / 1000);
       const milliseconds = Math.floor(ms % 1000);
-      const nanoseconds = Math.floor((ms % 1) * 1e6);
-      return `${days}d ${hours}h ${minutes}m ${seconds}s ${milliseconds}ms ${nanoseconds}ns`;
+      return `${days}d ${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
     }
 
     function updateProgressColor(percent) {
-      if(percent < 50) return '#4caf50'; // verde
-      if(percent < 80) return '#ff9800'; // naranja
-      return '#f44336'; // rojo
+      if(percent < 50) return '#4caf50';
+      if(percent < 80) return '#ff9800';
+      return '#f44336';
     }
 
     function updateTime() {
@@ -163,19 +163,19 @@
       const remainingMs = endDate - now;
 
       document.getElementById('total').textContent = formatTime(totalMs);
-      document.getElementById('elapsed').textContent = elapsedMs > 0 ? formatTime(elapsedMs) : "0d 0h 0m 0s 0ms 0ns";
-      document.getElementById('remaining').textContent = remainingMs > 0 ? formatTime(remainingMs) : "0d 0h 0m 0s 0ms 0ns";
+      document.getElementById('elapsed').textContent = elapsedMs > 0 ? formatTime(elapsedMs) : "0d 0h 0m 0s 0ms";
+      document.getElementById('remaining').textContent = remainingMs > 0 ? formatTime(remainingMs) : "0d 0h 0m 0s 0ms";
 
       let progressPercent = Math.min(Math.max((elapsedMs / totalMs) * 100, 0), 100);
       const progressBar = document.getElementById('progress-bar');
       progressBar.style.width = progressPercent + '%';
       progressBar.style.backgroundColor = updateProgressColor(progressPercent);
-      document.getElementById('progress-text').textContent = progressPercent.toFixed(6) + '%';
+      document.getElementById('progress-text').textContent = progressPercent.toFixed(2) + '%';
 
-      // Indicadores
       indicators.forEach(ind => {
         const left = Math.min(Math.max(ind.percent,0),100);
         ind.element.style.left = left + '%';
+        ind.label.style.left = left + '%';
         if(!ind.reached && progressPercent >= ind.percent){
           ind.reached = true;
           document.getElementById('alert-msg').style.display='block';
@@ -183,7 +183,8 @@
         }
         const totalMs = endDate - startDate;
         const targetMs = totalMs * (ind.percent/100);
-        ind.element.title = `Fecha: ${new Date(startDate.getTime() + targetMs).toLocaleString('es-ES',{hour12:false})}.${Math.floor((targetMs % 1)*1e6).toString().padStart(6,'0')} ns`;
+        ind.label.textContent = `${ind.percent}%`;
+        ind.label.title = `Fecha: ${new Date(startDate.getTime() + targetMs).toLocaleString('es-ES',{hour12:false})}`;
       });
     }
 
@@ -197,7 +198,12 @@
       const ind = document.createElement('div');
       ind.className='indicator';
       container.appendChild(ind);
-      indicators.push({percent: percentInput, element: ind, reached:false});
+
+      const label = document.createElement('div');
+      label.className='indicator-label';
+      container.appendChild(label);
+
+      indicators.push({percent: percentInput, element: ind, label: label, reached:false});
       document.getElementById('percentage').value='';
     }
 
@@ -207,12 +213,12 @@
         alert("Ingrese una fecha y hora");
         return;
       }
-      const simDate = new Date(input + "-05:00"); // Forzar Colombia UTC-5
+      const simDate = new Date(input + "-05:00");
       const totalMs = endDate - startDate;
       const elapsedMs = simDate - startDate;
       let percent = (elapsedMs/totalMs)*100;
       percent = Math.min(Math.max(percent,0),100);
-      document.getElementById('simulation-result').textContent = `Porcentaje aproximado: ${percent.toFixed(6)}%`;
+      document.getElementById('simulation-result').textContent = `Porcentaje aproximado: ${percent.toFixed(2)}%`;
     }
 
     setInterval(updateTime,50);
