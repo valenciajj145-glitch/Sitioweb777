@@ -1,215 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Contador 40 días — Live con ms</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiempo Total, Transcurrido y Restante</title>
   <style>
-    :root{--bg:#0f172a;--card:#0b1220;--accent:#7c3aed;--muted:#94a3b8}
-    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial}
-    body{display:grid;place-items:center;background:linear-gradient(180deg,#071024 0%, #08132a 100%);color:#e6eef8}
-    .card{width:min(920px,94vw);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:28px;border-radius:16px;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
-    h1{margin:0 0 8px;font-weight:600;font-size:1.35rem}
-    p.lead{margin:0 0 20px;color:var(--muted)}
-
-    .countdown{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
-    .segment{background:rgba(255,255,255,0.03);padding:12px 18px;border-radius:12px;min-width:120px;text-align:center}
-    .number{font-variant-numeric:tabular-nums;font-weight:700;font-size:1.6rem}
-    .label{color:var(--muted);font-size:0.85rem;margin-top:6px}
-
-    .small{font-size:0.9rem;color:var(--muted);margin-top:12px}
-    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
-    label{display:inline-flex;gap:8px;align-items:center}
-    input[type=date], input[type=datetime-local]{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:inherit}
-    .btn{background:linear-gradient(90deg,var(--accent),#4c1d95);padding:8px 12px;border-radius:10px;border:none;color:white;cursor:pointer}
-    .muted{color:var(--muted)}
-
-    footer{margin-top:14px;color:var(--muted);font-size:0.85rem;display:flex;justify-content:space-between;align-items:center}
-
-    @media (max-width:520px){.segment{min-width:100px;padding:10px 12px}.number{font-size:1.2rem}}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      color: #333;
+    }
+    .time-box {
+      background: #fff;
+      padding: 20px 40px;
+      margin: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .time-box p {
+      font-size: 1.5em;
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1>Contador en vivo — 40 días</h1>
-    <p class="lead">Cuenta regresiva con segundos y milisegundos. Diseño responsive y ajustes rápidos debajo.</p>
+  <h1>Tiempo entre 21/08/2025 y 01/10/2025 20:00</h1>
 
-    <div style="display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-      <div>
-        <div class="small">Fecha objetivo:</div>
-        <div id="targetHuman" style="font-weight:600;margin-top:6px">—</div>
-      </div>
+  <div class="time-box">
+    <p><strong>Total:</strong> <span id="total"></span></p>
+  </div>
 
-      <div style="text-align:right">
-        <div class="small">Opciones</div>
-        <div class="controls">
-          <label class="muted">Iniciar desde:
-            <input id="startDate" type="date" />
-          </label>
-          <label class="muted">Contar día 1:
-            <input id="countDayOne" type="checkbox" title="Si está activado cuenta el día de inicio como día 1" />
-          </label>
-          <button id="applyBtn" class="btn">Aplicar</button>
-        </div>
-      </div>
-    </div>
+  <div class="time-box">
+    <p><strong>Transcurrido:</strong> <span id="elapsed"></span></p>
+  </div>
 
-    <section style="margin-top:20px">
-      <div class="countdown" aria-live="polite">
-        <div class="segment"><div id="days" class="number">0</div><div class="label">Días</div></div>
-        <div class="segment"><div id="hours" class="number">00</div><div class="label">Horas</div></div>
-        <div class="segment"><div id="minutes" class="number">00</div><div class="label">Minutos</div></div>
-        <div class="segment"><div id="seconds" class="number">00</div><div class="label">Segundos</div></div>
-        <div class="segment"><div id="ms" class="number">000</div><div class="label">Milisegundos</div></div>
-      </div>
-
-      <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin-top:12px">
-        <button id="pauseBtn" class="btn">Pausar</button>
-        <button id="resetBtn" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06)">Restablecer</button>
-      </div>
-
-      <footer>
-        <div class="muted">Actualizando en tiempo real — precisión de milisegundos</div>
-        <div class="muted">UTC: <span id="utcNow">—</span></div>
-      </footer>
-    </section>
-  </main>
+  <div class="time-box">
+    <p><strong>Restante:</strong> <span id="remaining"></span></p>
+  </div>
 
   <script>
-    // Default start: 2025-08-21 (from your earlier message) -> target = start + 40 days
-    const defaultStart = new Date('2025-08-21T00:00:00');
-    const oneDayMs = 24*60*60*1000;
+    const startDate = new Date('2025-08-21T00:00:00');
+    const endDate = new Date('2025-10-01T20:00:00');
 
-    const startDateInput = document.getElementById('startDate');
-    const applyBtn = document.getElementById('applyBtn');
-    const countDayOneCheckbox = document.getElementById('countDayOne');
-
-    const daysEl = document.getElementById('days');
-    const hoursEl = document.getElementById('hours');
-    const minutesEl = document.getElementById('minutes');
-    const secondsEl = document.getElementById('seconds');
-    const msEl = document.getElementById('ms');
-    const targetHuman = document.getElementById('targetHuman');
-    const utcNow = document.getElementById('utcNow');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const resetBtn = document.getElementById('resetBtn');
-
-    let start = new Date(defaultStart);
-    let target = new Date(start.getTime() + 40*oneDayMs);
-    let running = true;
-    let rafId = null;
-
-    function pad(n, width=2){ return String(n).padStart(width, '0'); }
-
-    function updateTargetDisplay(){
-      targetHuman.textContent = target.toLocaleString();
+    function formatTime(ms) {
+      const totalMinutes = Math.floor(ms / 60000);
+      const days = Math.floor(totalMinutes / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
+      const minutes = totalMinutes % 60;
+      return `${days} días, ${hours} horas, ${minutes} minutos`;
     }
 
-    function updateUtcNow(){
-      const d = new Date();
-      utcNow.textContent = d.toISOString().replace('T',' ').replace('Z',' UTC');
-    }
-
-    function computeRemaining(){
+    function updateTime() {
       const now = new Date();
-      const diff = target.getTime() - now.getTime();
-      return diff; // ms
+
+      const totalMs = endDate - startDate;
+      const elapsedMs = now - startDate;
+      const remainingMs = endDate - now;
+
+      document.getElementById('total').textContent = formatTime(totalMs);
+      document.getElementById('elapsed').textContent = elapsedMs > 0 ? formatTime(elapsedMs) : "0 días, 0 horas, 0 minutos";
+      document.getElementById('remaining').textContent = remainingMs > 0 ? formatTime(remainingMs) : "0 días, 0 horas, 0 minutos";
     }
 
-    function render(){
-      updateUtcNow();
-      const rem = computeRemaining();
-      if(rem <= 0){
-        daysEl.textContent = '0';
-        hoursEl.textContent = '00';
-        minutesEl.textContent = '00';
-        secondsEl.textContent = '00';
-        msEl.textContent = '000';
-        cancelAnimationFrame(rafId);
-        running = false;
-        pauseBtn.textContent = 'Reiniciar';
-        return;
-      }
-      const totalMs = rem;
-      const days = Math.floor(totalMs / oneDayMs);
-      const hours = Math.floor((totalMs % oneDayMs) / (60*60*1000));
-      const minutes = Math.floor((totalMs % (60*60*1000)) / (60*1000));
-      const seconds = Math.floor((totalMs % (60*1000)) / 1000);
-      const ms = Math.floor(totalMs % 1000);
-
-      daysEl.textContent = days;
-      hoursEl.textContent = pad(hours);
-      minutesEl.textContent = pad(minutes);
-      secondsEl.textContent = pad(seconds);
-      msEl.textContent = String(ms).padStart(3,'0');
-
-      rafId = requestAnimationFrame(render);
-    }
-
-    function applySettings(){
-      const dateVal = startDateInput.value;
-      const useDayOne = countDayOneCheckbox.checked;
-      if(dateVal){
-        // interpret date input as local midnight of that day
-        const parts = dateVal.split('-');
-        const s = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]), 0,0,0);
-        start = s;
-      } else {
-        start = new Date(defaultStart);
-        startDateInput.value = start.toISOString().slice(0,10);
-      }
-
-      // Calculate target according to toggle: if day 1 = start, then target = start + (40-1) days
-      const addDays = useDayOne ? 39 : 40;
-      target = new Date(start.getTime() + addDays*oneDayMs);
-      updateTargetDisplay();
-
-      if(!running){
-        running = true;
-        pauseBtn.textContent = 'Pausar';
-        rafId = requestAnimationFrame(render);
-      }
-    }
-
-    // Pause/Resume
-    pauseBtn.addEventListener('click', ()=>{
-      if(running){
-        cancelAnimationFrame(rafId);
-        running = false;
-        pauseBtn.textContent = 'Reanudar';
-      } else {
-        // if countdown already finished, reset to compute again
-        if(computeRemaining() <= 0) applySettings();
-        running = true;
-        pauseBtn.textContent = 'Pausar';
-        rafId = requestAnimationFrame(render);
-      }
-    });
-
-    resetBtn.addEventListener('click', ()=>{
-      start = new Date(defaultStart);
-      countDayOneCheckbox.checked = false;
-      startDateInput.value = start.toISOString().slice(0,10);
-      applySettings();
-    });
-
-    applyBtn.addEventListener('click', applySettings);
-
-    // initialize inputs
-    startDateInput.value = start.toISOString().slice(0,10);
-    countDayOneCheckbox.checked = false;
-    updateTargetDisplay();
-
-    // start rendering
-    rafId = requestAnimationFrame(render);
-
-    // accessibility: allow space to pause
-    window.addEventListener('keydown', (e)=>{
-      if(e.code === 'Space'){
-        e.preventDefault();
-        pauseBtn.click();
-      }
-    });
+    setInterval(updateTime, 1000); // Actualiza cada segundo
+    updateTime();
   </script>
 </body>
 </html>
