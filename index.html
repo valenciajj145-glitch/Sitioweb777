@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador Avanzado de Porcentaje</title>
+  <title>Contador Avanzado de Porcentaje Corregido</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -61,17 +61,6 @@
       pointer-events: none;
       font-size: 0.9em;
     }
-    .tooltip {
-      position: absolute;
-      padding: 5px 10px;
-      background: rgba(0,0,0,0.7);
-      border-radius: 5px;
-      font-size: 0.9em;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s;
-      white-space: nowrap;
-    }
     .progress-text {
       margin-top: 10px;
       font-size: 1em;
@@ -109,7 +98,7 @@
   </style>
 </head>
 <body>
-  <h1>Contador Avanzado de Porcentaje</h1>
+  <h1>Contador Avanzado de Porcentaje Corregido</h1>
 
   <div class="time-box">
     <p>Total: <span id="total"></span></p>
@@ -159,14 +148,16 @@
     function updateTime() {
       const now = new Date();
       const totalMs = endDate - startDate;
-      const elapsedMs = now - startDate;
-      const remainingMs = endDate - now;
+      const elapsedMs = Math.min(now - startDate, totalMs); // Corregido para no exceder 100%
+      const remainingMs = Math.max(endDate - now, 0);
 
       document.getElementById('total').textContent = formatTime(totalMs);
-      document.getElementById('elapsed').textContent = elapsedMs > 0 ? formatTime(elapsedMs) : "0d 0h 0m 0s 0ms";
-      document.getElementById('remaining').textContent = remainingMs > 0 ? formatTime(remainingMs) : "0d 0h 0m 0s 0ms";
+      document.getElementById('elapsed').textContent = formatTime(elapsedMs);
+      document.getElementById('remaining').textContent = formatTime(remainingMs);
 
-      let progressPercent = Math.min(Math.max((elapsedMs / totalMs) * 100, 0), 100);
+      let progressPercent = (elapsedMs / totalMs) * 100;
+      progressPercent = Math.min(progressPercent, 100);
+
       const progressBar = document.getElementById('progress-bar');
       progressBar.style.width = progressPercent + '%';
       progressBar.style.backgroundColor = updateProgressColor(progressPercent);
@@ -176,12 +167,13 @@
         const left = Math.min(Math.max(ind.percent,0),100);
         ind.element.style.left = left + '%';
         ind.label.style.left = left + '%';
+
         if(!ind.reached && progressPercent >= ind.percent){
           ind.reached = true;
           document.getElementById('alert-msg').style.display='block';
           setTimeout(()=>{document.getElementById('alert-msg').style.display='none';},3000);
         }
-        const totalMs = endDate - startDate;
+
         const targetMs = totalMs * (ind.percent/100);
         ind.label.textContent = `${ind.percent}%`;
         ind.label.title = `Fecha: ${new Date(startDate.getTime() + targetMs).toLocaleString('es-ES',{hour12:false})}`;
@@ -215,7 +207,7 @@
       }
       const simDate = new Date(input + "-05:00");
       const totalMs = endDate - startDate;
-      const elapsedMs = simDate - startDate;
+      const elapsedMs = Math.min(simDate - startDate, totalMs);
       let percent = (elapsedMs/totalMs)*100;
       percent = Math.min(Math.max(percent,0),100);
       document.getElementById('simulation-result').textContent = `Porcentaje aproximado: ${percent.toFixed(2)}%`;
