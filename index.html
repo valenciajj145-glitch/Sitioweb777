@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador Avanzado de Porcentaje</title>
+  <title>Contador Avanzado de Porcentaje Máster</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -35,17 +35,15 @@
       font-size: 1.2em;
       margin: 10px 0;
     }
-    span {
-      font-weight: bold;
-      color: #ffd700;
-    }
+    span { font-weight: bold; color: #ffd700; }
+
     .progress-container {
       width: 90%;
       background: rgba(255,255,255,0.2);
       border-radius: 20px;
       overflow: hidden;
       margin-top: 20px;
-      height: 30px;
+      height: 35px;
       position: relative;
     }
     .progress-bar {
@@ -80,10 +78,10 @@
     .input-section {
       margin-top: 20px;
     }
-    input[type=number] {
+    input[type=number], input[type=datetime-local] {
       padding: 5px 10px;
       font-size: 1em;
-      width: 80px;
+      width: 150px;
       border-radius: 5px;
       border: none;
       margin-right: 10px;
@@ -104,10 +102,13 @@
       margin-top: 10px;
       display: none;
     }
+    .slider-section {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <h1>Contador Avanzado de Porcentaje</h1>
+  <h1>Contador Avanzado de Porcentaje Máster</h1>
 
   <div class="time-box">
     <p>Total: <span id="total"></span></p>
@@ -126,9 +127,15 @@
   </div>
   <p class="alert" id="alert-msg">¡Porcentaje alcanzado!</p>
 
+  <div class="slider-section">
+    <p>Simula porcentaje para cualquier fecha:</p>
+    <input type="datetime-local" id="simulate-date">
+    <button onclick="simulatePercentage()">Simular</button>
+    <p id="simulation-result"></p>
+  </div>
+
   <script>
-    // Fechas en hora de Colombia (UTC-5)
-    const startDate = new Date('2025-08-21T00:00:00-05:00');
+    const startDate = new Date('2025-08-21T00:00:00-05:00'); // Colombia UTC-5
     const endDate = new Date('2025-10-01T20:00:00-05:00');
 
     let indicators = [];
@@ -138,8 +145,9 @@
       const hours = Math.floor((ms % (1000*60*60*24)) / (1000*60*60));
       const minutes = Math.floor((ms % (1000*60*60)) / (1000*60));
       const seconds = Math.floor((ms % (1000*60)) / 1000);
-      const milliseconds = ms % 1000;
-      return `${days}d ${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
+      const milliseconds = Math.floor(ms % 1000);
+      const nanoseconds = Math.floor((ms % 1) * 1e6);
+      return `${days}d ${hours}h ${minutes}m ${seconds}s ${milliseconds}ms ${nanoseconds}ns`;
     }
 
     function updateProgressColor(percent) {
@@ -154,47 +162,60 @@
       const elapsedMs = now - startDate;
       const remainingMs = endDate - now;
 
-      // Actualizar textos
       document.getElementById('total').textContent = formatTime(totalMs);
-      document.getElementById('elapsed').textContent = elapsedMs > 0 ? formatTime(elapsedMs) : "0d 0h 0m 0s 0ms";
-      document.getElementById('remaining').textContent = remainingMs > 0 ? formatTime(remainingMs) : "0d 0h 0m 0s 0ms";
+      document.getElementById('elapsed').textContent = elapsedMs > 0 ? formatTime(elapsedMs) : "0d 0h 0m 0s 0ms 0ns";
+      document.getElementById('remaining').textContent = remainingMs > 0 ? formatTime(remainingMs) : "0d 0h 0m 0s 0ms 0ns";
 
-      // Barra de progreso
       let progressPercent = Math.min(Math.max((elapsedMs / totalMs) * 100, 0), 100);
       const progressBar = document.getElementById('progress-bar');
       progressBar.style.width = progressPercent + '%';
       progressBar.style.backgroundColor = updateProgressColor(progressPercent);
-      document.getElementById('progress-text').textContent = progressPercent.toFixed(2) + '%';
+      document.getElementById('progress-text').textContent = progressPercent.toFixed(6) + '%';
 
       // Indicadores
       indicators.forEach(ind => {
-        const left = Math.min(Math.max(ind.percent, 0), 100);
+        const left = Math.min(Math.max(ind.percent,0),100);
         ind.element.style.left = left + '%';
-        // Comprobar si alcanzado
-        if(!ind.reached && progressPercent >= ind.percent) {
+        if(!ind.reached && progressPercent >= ind.percent){
           ind.reached = true;
-          document.getElementById('alert-msg').style.display = 'block';
+          document.getElementById('alert-msg').style.display='block';
           setTimeout(()=>{document.getElementById('alert-msg').style.display='none';},3000);
         }
-        ind.element.title = `Fecha: ${new Date(startDate.getTime() + (totalMs*ind.percent/100)).toLocaleString('es-ES',{hour12:false})}.${Math.floor((totalMs*ind.percent/100)%1000).toString().padStart(3,'0')}`;
+        const totalMs = endDate - startDate;
+        const targetMs = totalMs * (ind.percent/100);
+        ind.element.title = `Fecha: ${new Date(startDate.getTime() + targetMs).toLocaleString('es-ES',{hour12:false})}.${Math.floor((targetMs % 1)*1e6).toString().padStart(6,'0')} ns`;
       });
     }
 
-    function addIndicator() {
+    function addIndicator(){
       const percentInput = parseFloat(document.getElementById('percentage').value);
-      if(isNaN(percentInput) || percentInput < 0 || percentInput > 100){
+      if(isNaN(percentInput) || percentInput <0 || percentInput>100){
         alert("Ingrese un porcentaje válido entre 0 y 100");
         return;
       }
       const container = document.getElementById('progress-container');
       const ind = document.createElement('div');
-      ind.className = 'indicator';
+      ind.className='indicator';
       container.appendChild(ind);
-      indicators.push({percent: percentInput, element: ind, reached: false});
-      document.getElementById('percentage').value = '';
+      indicators.push({percent: percentInput, element: ind, reached:false});
+      document.getElementById('percentage').value='';
     }
 
-    setInterval(updateTime, 50);
+    function simulatePercentage(){
+      const input = document.getElementById('simulate-date').value;
+      if(!input){
+        alert("Ingrese una fecha y hora");
+        return;
+      }
+      const simDate = new Date(input + "-05:00"); // Forzar Colombia UTC-5
+      const totalMs = endDate - startDate;
+      const elapsedMs = simDate - startDate;
+      let percent = (elapsedMs/totalMs)*100;
+      percent = Math.min(Math.max(percent,0),100);
+      document.getElementById('simulation-result').textContent = `Porcentaje aproximado: ${percent.toFixed(6)}%`;
+    }
+
+    setInterval(updateTime,50);
     updateTime();
   </script>
 </body>
