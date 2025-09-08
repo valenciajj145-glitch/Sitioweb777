@@ -3,152 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador Avanzado de Porcentaje Corregido</title>
+  <title>Contador de Porcentaje Avanzado</title>
   <style>
+    :root {
+      --primary-color: #6a11cb;
+      --secondary-color: #2575fc;
+      --background-gradient: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      --text-color: #e0e0e0;
+      --highlight-color: #ffc107;
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --border-radius: 15px;
+      --shadow: 0 8px 25px rgba(0,0,0,0.3);
+      --progress-low: #4caf50;
+      --progress-medium: #ff9800;
+      --progress-high: #f44336;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
+      background: var(--background-gradient);
+      color: var(--text-color);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       min-height: 100vh;
       margin: 0;
       padding: 20px;
       text-align: center;
+      overflow-x: hidden;
+      transition: background 0.5s ease-in-out;
     }
     h1 {
-      font-size: 2em;
+      font-size: clamp(1.5em, 5vw, 2.5em);
       margin-bottom: 20px;
-      text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+      animation: fadeIn 1s ease-out;
     }
-    .time-box {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 20px 40px;
-      margin: 10px;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      min-width: 300px;
+    .main-container {
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      width: 95%;
+      max-width: 600px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .date-input-section, .time-box, .input-section, .slider-section {
+      margin-top: 25px;
+      animation: slideInUp 0.8s ease-out;
     }
     .time-box p {
       font-size: 1.2em;
       margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
     }
-    span { font-weight: bold; color: #ffd700; }
-
+    .time-box span {
+      font-weight: bold;
+      color: var(--highlight-color);
+      text-align: right;
+    }
     .progress-container {
-      width: 90%;
+      width: 100%;
       background: rgba(255,255,255,0.2);
-      border-radius: 20px;
-      overflow: hidden;
-      margin-top: 20px;
+      border-radius: 25px;
       height: 35px;
       position: relative;
+      margin-top: 25px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
     }
     .progress-bar {
       height: 100%;
       width: 0%;
-      border-radius: 20px 0 0 20px;
+      border-radius: 25px 0 0 25px;
       transition: width 0.05s linear, background-color 0.2s linear;
+    }
+    .progress-text {
+      font-size: 1.1em;
+      margin-top: 15px;
+      font-weight: bold;
+      color: var(--text-color);
     }
     .indicator, .indicator-label {
       position: absolute;
-      top: -25px;
-      text-align: center;
-      color: red;
-      font-weight: bold;
+      top: 0;
+      transform: translateX(-50%);
       pointer-events: none;
       font-size: 0.9em;
+      text-align: center;
+      white-space: nowrap;
+      transition: left 0.2s ease-out;
     }
-    .progress-text {
-      margin-top: 10px;
+    .indicator {
+      top: -5px;
+      height: 45px;
+      width: 2px;
+      background-color: var(--highlight-color);
+      z-index: 10;
+      box-shadow: 0 0 10px var(--highlight-color);
+    }
+    .indicator-label {
+      top: -25px;
+      color: var(--highlight-color);
+      font-weight: bold;
+      z-index: 11;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    }
+    input[type=number], input[type=datetime-local], button {
+      padding: 10px 15px;
       font-size: 1em;
-    }
-    .input-section {
-      margin-top: 20px;
-    }
-    input[type=number], input[type=datetime-local] {
-      padding: 5px 10px;
-      font-size: 1em;
-      width: 150px;
-      border-radius: 5px;
+      border-radius: 8px;
       border: none;
-      margin-right: 10px;
+      margin: 5px;
+      background: rgba(255,255,255,0.1);
+      color: var(--text-color);
+      transition: all 0.3s ease;
     }
+    input::placeholder { color: rgba(255,255,255,0.6); }
+    input:focus { outline: none; box-shadow: 0 0 0 2px var(--highlight-color); }
     button {
-      padding: 5px 15px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: none;
-      background: #ffd700;
-      color: #333;
+      background: var(--highlight-color);
+      color: var(--primary-color);
       cursor: pointer;
       font-weight: bold;
     }
-    .alert {
-      color: #ff4d4d;
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
+    .toast {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
       font-weight: bold;
-      margin-top: 10px;
-      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     }
-    .slider-section {
-      margin-top: 20px;
+    .toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
     }
+    #counter-display { display: block; }
+    #date-input-container { display: none; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
 <body>
-  <h1>Contador Avanzado de Porcentaje Corregido</h1>
+  <h1>Contador de Porcentaje Avanzado</h1>
 
-  <div class="time-box">
-    <p>Total: <span id="total"></span></p>
-    <p>Transcurrido: <span id="elapsed"></span></p>
-    <p>Restante: <span id="remaining"></span></p>
+  <div class="main-container" id="date-input-container">
+    <h2>Configurar Fechas</h2>
+    <div class="date-input-section">
+      <p>Fecha de Inicio:</p>
+      <input type="datetime-local" id="start-date-input">
+      <p>Fecha de Fin:</p>
+      <input type="datetime-local" id="end-date-input">
+      <button onclick="startCountdown()">Iniciar Contador</button>
+    </div>
   </div>
 
-  <div class="progress-container" id="progress-container">
-    <div class="progress-bar" id="progress-bar"></div>
-  </div>
-  <div class="progress-text" id="progress-text">0%</div>
+  <div class="main-container" id="counter-display">
+    <div class="time-box">
+      <p>Total: <span id="total"></span></p>
+      <p>Transcurrido: <span id="elapsed"></span></p>
+      <p>Restante: <span id="remaining"></span></p>
+    </div>
 
-  <div class="input-section">
-    <input type="number" id="percentage" placeholder="%" min="0" max="100">
-    <button onclick="addIndicator()">Añadir Indicador</button>
-  </div>
-  <p class="alert" id="alert-msg">¡Porcentaje alcanzado!</p>
+    <div class="progress-container" id="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="progress-text" id="progress-text">0%</div>
 
-  <div class="slider-section">
-    <p>Simula porcentaje para cualquier fecha:</p>
-    <input type="datetime-local" id="simulate-date">
-    <button onclick="simulatePercentage()">Simular</button>
-    <p id="simulation-result"></p>
+    <div class="input-section">
+      <input type="number" id="percentage" placeholder="%" min="0" max="100">
+      <button onclick="addIndicator()">Añadir Indicador</button>
+    </div>
+
+    <div class="slider-section">
+      <p>Simular para una fecha específica:</p>
+      <input type="datetime-local" id="simulate-date">
+      <button onclick="simulatePercentage()">Simular</button>
+      <p id="simulation-result"></p>
+    </div>
+  </div>
+
+  <div class="toast-container">
+    <div id="toast" class="toast">¡Porcentaje alcanzado!</div>
   </div>
 
   <script>
     const startDate = new Date('2025-08-21T00:00:00-05:00');
     const endDate = new Date('2025-10-01T20:00:00-05:00');
-
     let indicators = [];
+    let intervalId;
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
 
     function formatTime(ms) {
-      const days = Math.floor(ms / (1000*60*60*24));
-      const hours = Math.floor((ms % (1000*60*60*24)) / (1000*60*60));
-      const minutes = Math.floor((ms % (1000*60*60)) / (1000*60));
-      const seconds = Math.floor((ms % (1000*60)) / 1000);
-      const milliseconds = Math.floor(ms % 1000);
-      return `${days}d ${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
+      if (ms < 0) ms = 0;
+      const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
     }
 
     function updateProgressColor(percent) {
-      if(percent < 50) return '#4caf50';
-      if(percent < 80) return '#ff9800';
-      return '#f44336';
+      if (percent < 50) return 'var(--progress-low)';
+      if (percent < 80) return 'var(--progress-medium)';
+      return 'var(--progress-high)';
     }
 
     function updateTime() {
       const now = new Date();
       const totalMs = endDate - startDate;
-      const elapsedMs = Math.min(now - startDate, totalMs); // Corregido para no exceder 100%
+      const elapsedMs = Math.min(now - startDate, totalMs);
       const remainingMs = Math.max(endDate - now, 0);
 
       document.getElementById('total').textContent = formatTime(totalMs);
@@ -156,7 +248,7 @@
       document.getElementById('remaining').textContent = formatTime(remainingMs);
 
       let progressPercent = (elapsedMs / totalMs) * 100;
-      progressPercent = Math.min(progressPercent, 100);
+      progressPercent = Math.min(Math.max(progressPercent, 0), 100);
 
       const progressBar = document.getElementById('progress-bar');
       progressBar.style.width = progressPercent + '%';
@@ -164,57 +256,57 @@
       document.getElementById('progress-text').textContent = progressPercent.toFixed(2) + '%';
 
       indicators.forEach(ind => {
-        const left = Math.min(Math.max(ind.percent,0),100);
+        const left = Math.min(Math.max(ind.percent, 0), 100);
         ind.element.style.left = left + '%';
         ind.label.style.left = left + '%';
 
-        if(!ind.reached && progressPercent >= ind.percent){
+        if (!ind.reached && progressPercent >= ind.percent) {
           ind.reached = true;
-          document.getElementById('alert-msg').style.display='block';
-          setTimeout(()=>{document.getElementById('alert-msg').style.display='none';},3000);
+          showToast(`¡Porcentaje de ${ind.percent}% alcanzado!`);
         }
 
-        const targetMs = totalMs * (ind.percent/100);
+        const targetMs = totalMs * (ind.percent / 100);
         ind.label.textContent = `${ind.percent}%`;
-        ind.label.title = `Fecha: ${new Date(startDate.getTime() + targetMs).toLocaleString('es-ES',{hour12:false})}`;
+        ind.label.title = `Fecha: ${new Date(startDate.getTime() + targetMs).toLocaleString('es-ES', { hour12: false })}`;
       });
     }
 
-    function addIndicator(){
+    function addIndicator() {
       const percentInput = parseFloat(document.getElementById('percentage').value);
-      if(isNaN(percentInput) || percentInput <0 || percentInput>100){
+      if (isNaN(percentInput) || percentInput < 0 || percentInput > 100) {
         alert("Ingrese un porcentaje válido entre 0 y 100");
         return;
       }
       const container = document.getElementById('progress-container');
       const ind = document.createElement('div');
-      ind.className='indicator';
+      ind.className = 'indicator';
       container.appendChild(ind);
 
       const label = document.createElement('div');
-      label.className='indicator-label';
+      label.className = 'indicator-label';
       container.appendChild(label);
 
-      indicators.push({percent: percentInput, element: ind, label: label, reached:false});
-      document.getElementById('percentage').value='';
+      indicators.push({ percent: percentInput, element: ind, label: label, reached: false });
+      document.getElementById('percentage').value = '';
     }
 
-    function simulatePercentage(){
+    function simulatePercentage() {
       const input = document.getElementById('simulate-date').value;
-      if(!input){
-        alert("Ingrese una fecha y hora");
+      if (!input) {
+        alert("Ingrese una fecha y hora para simular");
         return;
       }
-      const simDate = new Date(input + "-05:00");
+      const simDate = new Date(input);
       const totalMs = endDate - startDate;
       const elapsedMs = Math.min(simDate - startDate, totalMs);
-      let percent = (elapsedMs/totalMs)*100;
-      percent = Math.min(Math.max(percent,0),100);
-      document.getElementById('simulation-result').textContent = `Porcentaje aproximado: ${percent.toFixed(2)}%`;
+      let percent = (elapsedMs / totalMs) * 100;
+      percent = Math.min(Math.max(percent, 0), 100);
+      document.getElementById('simulation-result').textContent = `Porcentaje en la fecha simulada: ${percent.toFixed(2)}%`;
     }
 
-    setInterval(updateTime,50);
+    // Iniciar el contador automáticamente
     updateTime();
+    intervalId = setInterval(updateTime, 50);
   </script>
 </body>
 </html>
