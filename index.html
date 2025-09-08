@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador en Vivo con Porcentaje</title>
+  <title>Contador en Vivo con Porcentaje Preciso</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -45,6 +45,7 @@
       overflow: hidden;
       margin-top: 20px;
       height: 25px;
+      position: relative;
     }
     .progress-bar {
       height: 100%;
@@ -52,6 +53,13 @@
       background: #ffdd57;
       transition: width 0.05s linear;
       border-radius: 20px 0 0 20px;
+    }
+    .progress-indicator {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 3px;
+      background: red;
     }
     .progress-text {
       margin-top: 10px;
@@ -81,7 +89,7 @@
   </style>
 </head>
 <body>
-  <h1>Contador en Vivo con Porcentaje</h1>
+  <h1>Contador en Vivo con Porcentaje Preciso</h1>
 
   <div class="time-box">
     <p>Total: <span id="total"></span></p>
@@ -91,6 +99,7 @@
 
   <div class="progress-container">
     <div class="progress-bar" id="progress-bar"></div>
+    <div class="progress-indicator" id="progress-indicator"></div>
   </div>
   <div class="progress-text" id="progress-text">0%</div>
 
@@ -101,8 +110,8 @@
   </div>
 
   <script>
-    const startDate = new Date('2025-08-21T00:00:00');
-    const endDate = new Date('2025-10-01T20:00:00');
+    const startDate = new Date('2025-08-21T00:00:00.000');
+    const endDate = new Date('2025-10-01T20:00:00.000');
 
     function formatTime(ms) {
       const days = Math.floor(ms / (1000*60*60*24));
@@ -113,19 +122,29 @@
       return `${days} días, ${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
     }
 
+    let userPercent = null;
+
     function updateTime() {
       const now = new Date();
       const totalMs = endDate - startDate;
       const elapsedMs = now - startDate;
       const remainingMs = endDate - now;
 
+      // Actualizar textos
       document.getElementById('total').textContent = formatTime(totalMs);
       document.getElementById('elapsed').textContent = elapsedMs > 0 ? formatTime(elapsedMs) : "0 días, 0h 0m 0s 0ms";
       document.getElementById('remaining').textContent = remainingMs > 0 ? formatTime(remainingMs) : "0 días, 0h 0m 0s 0ms";
 
+      // Actualizar barra de progreso
       const progressPercent = Math.min(Math.max((elapsedMs / totalMs) * 100, 0), 100);
       document.getElementById('progress-bar').style.width = progressPercent + '%';
       document.getElementById('progress-text').textContent = progressPercent.toFixed(2) + '%';
+
+      // Actualizar indicador del porcentaje ingresado por el usuario
+      if (userPercent !== null) {
+        const indicator = document.getElementById('progress-indicator');
+        indicator.style.left = `${Math.min(Math.max(userPercent, 0), 100)}%`;
+      }
     }
 
     function showTarget() {
@@ -136,12 +155,14 @@
         return;
       }
 
+      userPercent = percent; // Guardamos para mostrar el indicador
+
       const totalMs = endDate - startDate;
       const targetMs = totalMs * (percent / 100);
       const targetDate = new Date(startDate.getTime() + targetMs);
 
       document.getElementById('target-date').textContent = 
-        `El ${percent}% se alcanzará el: ${targetDate.toLocaleString('es-ES')}`;
+        `El ${percent}% se alcanzará el: ${targetDate.toLocaleString('es-ES', { hour12: false })}.${targetDate.getMilliseconds().toString().padStart(3,'0')}`;
     }
 
     setInterval(updateTime, 50);
