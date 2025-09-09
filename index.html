@@ -3,104 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contador de Tiempo</title>
+    <title>Contador de Tiempo con Estilo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --accent-color: #28a745;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #343a40;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
-            color: #333;
-            text-align: center;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            box-sizing: border-box;
         }
+
         .container {
-            background-color: #fff;
-            padding: 2em;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 800px;
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px var(--shadow-color);
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            margin: 20px 0;
+            box-sizing: border-box;
         }
-        h1, h2 {
-            color: #0056b3;
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 25px;
+            font-size: 2.5em;
         }
+
+        h2 {
+            color: var(--primary-color);
+            font-weight: 400;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
         .counter-section {
-            margin-bottom: 2em;
+            margin-bottom: 30px;
         }
+
         .counter-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            font-size: 1.2em;
-            margin-top: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            font-size: 1.1em;
+            margin-top: 20px;
+            justify-content: center; /* Center items in case of fewer than 5 */
         }
+
         .counter-grid div {
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-        }
-        .progress-bar-container {
-            width: 100%;
-            background-color: #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-top: 1em;
-        }
-        #progress-bar {
-            height: 30px;
-            background-color: #28a745;
-            text-align: center;
-            line-height: 30px;
-            color: white;
-            transition: width 0.5s ease-in-out;
-        }
-        .interactive-section {
-            margin-top: 2em;
+            padding: 15px 10px;
+            background-color: #e9f2fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-weight: 700;
+            color: var(--primary-color);
             display: flex;
             flex-direction: column;
-            gap: 1em;
+            align-items: center;
+            justify-content: center;
+            min-height: 70px;
+        }
+        
+        .counter-grid span {
+            font-size: 1.5em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 50px;
+            height: 35px;
+            overflow: hidden;
+            margin-top: 1.5em;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        #progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            text-align: center;
+            line-height: 35px;
+            color: white;
+            transition: width 0.5s ease-in-out, background-color 0.5s ease;
+            border-radius: 50px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        #progress-bar.complete {
+            background-color: #17a2b8; /* A different color for completion */
+        }
+
+
+        .interactive-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
             align-items: center;
         }
+
         .input-group {
             display: flex;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
             gap: 10px;
             align-items: center;
+            justify-content: center;
         }
+
         input[type="number"] {
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 80px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            width: 100px;
+            font-size: 1em;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
         }
+
         button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 5px;
-            background-color: #007bff;
+            border-radius: 8px;
+            background-color: var(--primary-color);
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1em;
+            font-weight: 700;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+
         button:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
         }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
         .result {
-            margin-top: 1em;
-            font-weight: bold;
+            margin-top: 15px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            font-size: 1.1em;
+            min-height: 30px; /* Prevent layout shift when result appears */
+        }
+
+        p {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 40px 0;
+            width: 80%;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .container {
+                padding: 20px;
+            }
+            .counter-grid {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                gap: 10px;
+                font-size: 0.9em;
+            }
+            .counter-grid span {
+                font-size: 1.2em;
+            }
+            input[type="number"] {
+                width: 80px;
+                padding: 8px 10px;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+            .progress-bar-container {
+                height: 30px;
+            }
+            #progress-bar {
+                line-height: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            .container {
+                padding: 15px;
+                margin: 10px 0;
+            }
+            .counter-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns on very small screens */
+                font-size: 0.8em;
+            }
+            .counter-grid span {
+                font-size: 1em;
+            }
+            .input-group {
+                flex-direction: column; /* Stack elements vertically */
+                width: 100%;
+            }
+            input[type="number"] {
+                width: calc(100% - 22px); /* Full width minus padding and border */
+            }
+            button {
+                width: 100%;
+                max-width: 250px; /* Limit button width if stacked */
+            }
+            .interactive-section p {
+                padding: 0 10px;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Contador de Tiempo</h1>
+        <h1>🚀 Contador de Evento Especial 🗓️</h1>
+
+        <p>Monitoreando el tiempo desde el <span style="font-weight: bold; color: var(--primary-color);">21 de Agosto</span> hasta el <span style="font-weight: bold; color: var(--primary-color);">1 de Octubre a las 8:00 PM</span>.</p>
 
         <div class="counter-section">
-            <h2>Tiempo Total del Evento</h2>
+            <h2>⏳ Tiempo Total del Evento</h2>
             <div id="total-time" class="counter-grid">
                 <div><span id="total-days">0</span> días</div>
                 <div><span id="total-hours">0</span> horas</div>
@@ -111,7 +288,7 @@
         </div>
 
         <div class="counter-section">
-            <h2>Tiempo Transcurrido</h2>
+            <h2>➡️ Tiempo Transcurrido</h2>
             <div id="elapsed-time" class="counter-grid">
                 <div><span id="elapsed-days">0</span> días</div>
                 <div><span id="elapsed-hours">0</span> horas</div>
@@ -122,7 +299,7 @@
         </div>
         
         <div class="counter-section">
-            <h2>Tiempo Restante</h2>
+            <h2>⬅️ Tiempo Restante</h2>
             <div id="remaining-time" class="counter-grid">
                 <div><span id="remaining-days">0</span> días</div>
                 <div><span id="remaining-hours">0</span> horas</div>
@@ -135,7 +312,7 @@
         <hr>
 
         <div class="counter-section">
-            <h2>Progreso</h2>
+            <h2>📊 Progreso del Evento</h2>
             <div class="progress-bar-container">
                 <div id="progress-bar"></div>
             </div>
@@ -144,8 +321,8 @@
         <hr>
 
         <div class="interactive-section">
-            <h2>Calculadora de Porcentaje</h2>
-            <p>Ingresa un porcentaje para saber en qué fecha se alcanza.</p>
+            <h2>📆 ¿Cuándo se Cumple un Porcentaje?</h2>
+            <p>Ingresa un porcentaje para descubrir la fecha y hora exactas en que se alcanzará.</p>
             <div class="input-group">
                 <input type="number" id="percentage-input" min="0" max="100" value="50">
                 <span>%</span>
@@ -157,58 +334,77 @@
         <hr>
 
         <div class="interactive-section">
-            <h2>Generador de Cita Aleatoria</h2>
-            <p>Obtén una cita motivadora para tu día.</p>
+            <h2>✨ ¡Tu Dosis de Inspiración! ✨</h2>
+            <p>Haz clic para una cita motivadora que ilumine tu día.</p>
             <button onclick="generateRandomQuote()">Generar Cita</button>
             <div id="quote-result" class="result"></div>
         </div>
     </div>
 
     <script>
-        const startDate = new Date('2025-08-21T00:00:00');
+        // Año actualizado a 2025 para que el contador tenga sentido futuro
+        const startDate = new Date('2025-08-21T00:00:00'); 
         const endDate = new Date('2025-10-01T20:00:00');
+
+        function formatTime(ms) {
+            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+            ms %= (1000 * 60 * 60 * 24);
+            const hours = Math.floor(ms / (1000 * 60 * 60));
+            ms %= (1000 * 60 * 60);
+            const minutes = Math.floor(ms / (1000 * 60));
+            ms %= (1000 * 60);
+            const seconds = Math.floor(ms / 1000);
+            const milliseconds = ms % 1000;
+            return { days, hours, minutes, seconds, milliseconds };
+        }
 
         function updateCounters() {
             const now = new Date();
             
             // Tiempo total
             const totalTimeMs = endDate.getTime() - startDate.getTime();
-            document.getElementById('total-days').textContent = Math.floor(totalTimeMs / (1000 * 60 * 60 * 24));
-            document.getElementById('total-hours').textContent = Math.floor((totalTimeMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById('total-minutes').textContent = Math.floor((totalTimeMs % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById('total-seconds').textContent = Math.floor((totalTimeMs % (1000 * 60)) / 1000);
-            document.getElementById('total-milliseconds').textContent = totalTimeMs % 1000;
+            const total = formatTime(totalTimeMs);
+            document.getElementById('total-days').textContent = total.days;
+            document.getElementById('total-hours').textContent = total.hours;
+            document.getElementById('total-minutes').textContent = total.minutes;
+            document.getElementById('total-seconds').textContent = total.seconds;
+            document.getElementById('total-milliseconds').textContent = total.milliseconds;
 
             // Tiempo transcurrido
             const elapsedTimeMs = now.getTime() - startDate.getTime();
-            document.getElementById('elapsed-days').textContent = Math.floor(elapsedTimeMs / (1000 * 60 * 60 * 24));
-            document.getElementById('elapsed-hours').textContent = Math.floor((elapsedTimeMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById('elapsed-minutes').textContent = Math.floor((elapsedTimeMs % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById('elapsed-seconds').textContent = Math.floor((elapsedTimeMs % (1000 * 60)) / 1000);
-            document.getElementById('elapsed-milliseconds').textContent = elapsedTimeMs % 1000;
+            const elapsed = formatTime(Math.max(0, elapsedTimeMs)); // Ensure not negative
+            document.getElementById('elapsed-days').textContent = elapsed.days;
+            document.getElementById('elapsed-hours').textContent = elapsed.hours;
+            document.getElementById('elapsed-minutes').textContent = elapsed.minutes;
+            document.getElementById('elapsed-seconds').textContent = elapsed.seconds;
+            document.getElementById('elapsed-milliseconds').textContent = elapsed.milliseconds;
 
             // Tiempo restante
             const remainingTimeMs = endDate.getTime() - now.getTime();
-            if (remainingTimeMs < 0) {
-                document.getElementById('remaining-days').textContent = 0;
-                document.getElementById('remaining-hours').textContent = 0;
-                document.getElementById('remaining-minutes').textContent = 0;
-                document.getElementById('remaining-seconds').textContent = 0;
-                document.getElementById('remaining-milliseconds').textContent = 0;
-                document.getElementById('progress-bar').style.width = '100%';
-                document.getElementById('progress-bar').textContent = '¡100% Completo!';
-            } else {
-                document.getElementById('remaining-days').textContent = Math.floor(remainingTimeMs / (1000 * 60 * 60 * 24));
-                document.getElementById('remaining-hours').textContent = Math.floor((remainingTimeMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                document.getElementById('remaining-minutes').textContent = Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60));
-                document.getElementById('remaining-seconds').textContent = Math.floor((remainingTimeMs % (1000 * 60)) / 1000);
-                document.getElementById('remaining-milliseconds').textContent = remainingTimeMs % 1000;
+            const remaining = formatTime(Math.max(0, remainingTimeMs)); // Ensure not negative
+            document.getElementById('remaining-days').textContent = remaining.days;
+            document.getElementById('remaining-hours').textContent = remaining.hours;
+            document.getElementById('remaining-minutes').textContent = remaining.minutes;
+            document.getElementById('remaining-seconds').textContent = remaining.seconds;
+            document.getElementById('remaining-milliseconds').textContent = remaining.milliseconds;
 
-                // Barra de progreso
+            // Barra de progreso
+            const progressBar = document.getElementById('progress-bar');
+            if (remainingTimeMs < 0) {
+                progressBar.style.width = '100%';
+                progressBar.textContent = '¡100% Completo!';
+                progressBar.classList.add('complete');
+            } else if (elapsedTimeMs < 0) { // Before start date
+                progressBar.style.width = '0%';
+                progressBar.textContent = '0.00%';
+                progressBar.classList.remove('complete');
+            }
+            else {
                 const progress = (elapsedTimeMs / totalTimeMs) * 100;
-                const progressWidth = Math.min(progress, 100);
-                document.getElementById('progress-bar').style.width = progressWidth + '%';
-                document.getElementById('progress-bar').textContent = progressWidth.toFixed(2) + '%';
+                const progressWidth = Math.min(Math.max(0, progress), 100);
+                progressBar.style.width = progressWidth + '%';
+                progressBar.textContent = progressWidth.toFixed(2) + '%';
+                progressBar.classList.remove('complete');
             }
         }
 
@@ -235,6 +431,10 @@
             "Cree que puedes y ya estás a medio camino. - Theodore Roosevelt",
             "El futuro pertenece a quienes creen en la belleza de sus sueños. - Eleanor Roosevelt",
             "La vida es 10% lo que te sucede y 90% cómo reaccionas a ello. - Charles R. Swindoll",
+            "El camino hacia el éxito y el camino hacia el fracaso son casi exactamente los mismos. - Colin R. Davis",
+            "Si puedes soñarlo, puedes lograrlo. - Zig Ziglar",
+            "La innovación distingue a un líder de los seguidores. - Steve Jobs",
+            "La mejor forma de predecir el futuro es creándolo. - Peter Drucker",
             "Los johans nunca mueren - Elenor Gotroc"
         ];
 
@@ -243,9 +443,10 @@
             document.getElementById('quote-result').textContent = quotes[randomIndex];
         }
 
-        setInterval(updateCounters, 1);
+        // Ejecutar inmediatamente y luego cada milisegundo
         updateCounters();
+        setInterval(updateCounters, 1);
     </script>
 
 </body>
-              </html>
+</html>
