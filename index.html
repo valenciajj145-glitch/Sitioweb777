@@ -61,6 +61,10 @@
       display: block;
       margin-bottom: 20px;
     }
+
+    #buttons {
+      display: none; /* Se muestran solo si estás logueado */
+    }
   </style>
 </head>
 <body>
@@ -71,11 +75,13 @@
   </div>
 
   <!-- Contador -->
-  <div id="contador" style="display:none;">
+  <div id="contador">
     <span id="username"></span>
     <div>
-      <button onclick="updateCounter(-1)">-</button>
       <span id="count">0</span>
+    </div>
+    <div id="buttons">
+      <button onclick="updateCounter(-1)">-</button>
       <button onclick="updateCounter(1)">+</button>
     </div>
   </div>
@@ -89,15 +95,18 @@
 
         if (data.logged) {
           document.getElementById("loginBtn").style.display = "none";
-          document.getElementById("contador").style.display = "block";
           document.getElementById("username").textContent = data.username;
-          loadCounter();
+          document.getElementById("buttons").style.display = "block";
         } else {
           document.getElementById("loginBtn").style.display = "block";
-          document.getElementById("contador").style.display = "none";
+          document.getElementById("username").textContent = "";
+          document.getElementById("buttons").style.display = "none";
         }
+
+        loadCounter();
       } catch (err) {
         console.error(err);
+        loadCounter(); // aunque haya error, mostrar contador
       }
     }
 
