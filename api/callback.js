@@ -1,11 +1,9 @@
-import cookie from "cookie";
-
 export default async function handler(req, res) {
   const code = req.query.code;
   if (!code) return res.status(400).send("No code");
 
   try {
-    // Token exchange
+    // Intercambiar código por token
     const data = new URLSearchParams({
       client_id: process.env.DISCORD_CLIENT_ID,
       client_secret: process.env.DISCORD_CLIENT_SECRET,
@@ -47,14 +45,10 @@ export default async function handler(req, res) {
       return res.status(403).send("No autorizado");
     }
 
-    // Guardar cookie
+    // Guardar cookie sin dependencias
     res.setHeader(
       "Set-Cookie",
-      cookie.serialize("discord_id", user.id, {
-        httpOnly: true,
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 días
-      })
+      `discord_id=${user.id}; HttpOnly; Path=/; Max-Age=${60*60*24*7}`
     );
 
     res.redirect("/");
