@@ -16,3 +16,4 @@ export default function handler(req, res) {
 
   res.redirect(`https://discord.com/api/oauth2/authorize?${params.toString()}`);
 }
+
