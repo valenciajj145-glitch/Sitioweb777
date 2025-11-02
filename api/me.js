@@ -7,14 +7,13 @@ export default async function handler(req, res) {
     return res.json({ logged: false });
   }
 
-  // Opcional: si quieres mostrar avatar y username
   try {
-    const userRes = await fetch(`https://discord.com/api/users/${discordId}`, {
-      headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` } // si tienes un bot, o usa info que guardaste
-    });
-    // si no tienes bot, solo retorna logged y nombre genérico
-    res.json({ logged: true, username: "Tú" }); 
+    // Obtenemos información del usuario usando token de OAuth si quieres avatar real
+    // Para backend temporal, si no tienes token de bot, podemos construir avatar URL genérico
+    const avatarUrl = `https://cdn.discordapp.com/avatars/${discordId}/placeholder.png`;
+    res.json({ logged: true, username: "Tú", avatar: avatarUrl });
   } catch {
     res.json({ logged: true, username: "Tú" });
   }
 }
+
