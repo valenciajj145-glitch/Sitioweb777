@@ -10,6 +10,6 @@ export default async function handler(req, res) {
   return res.json({
     logged: true,
     username: "Mack",
-    avatar: "https://cdn.discordapp.com/embed/avatars/1.png"
+    avatar: "https://cdn.discordapp.com/embed/avatars/1.png",
   });
 }
