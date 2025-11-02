@@ -1,6 +1,11 @@
 import fetch from "node-fetch";
 import cookie from "cookie";
 
+console.log("CLIENT_ID:", process.env.DISCORD_CLIENT_ID);
+console.log("CLIENT_SECRET:", process.env.DISCORD_CLIENT_SECRET ? "ok" : "missing");
+console.log("REDIRECT_URI:", process.env.DISCORD_REDIRECT_URI);
+console.log("ADMIN_ID:", process.env.ADMIN_DISCORD_ID);
+
 export default async function handler(req, res) {
   const code = req.query.code;
   if (!code) return res.status(400).send("No code");
