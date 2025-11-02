@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const discordId = match[1];
 
   // Solo tú (ADMIN_DISCORD_ID) tienes acceso de edición
-  const isAdmin = discordId === process.env.ADMIN_DISCORD_ID;
+  const isAdmin = discordId === process.env.MY_DISCORD_ID;
 
   return res.json({
     logged: true,
