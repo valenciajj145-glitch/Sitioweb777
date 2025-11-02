@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     const user = await userRes.json();
 
     // Solo tu ID puede modificar
-    if (user.id !== process.env.ADMIN_DISCORD_ID) {
+    if (user.id !== process.env.MY_DISCORD_ID) {
       return res.status(403).send("No autorizado");
     }
 
