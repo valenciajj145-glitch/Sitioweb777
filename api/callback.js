@@ -1,34 +1,46 @@
-import fs from "fs";
-import path from "path";
+import fetch from "node-fetch";
+import cookie from "cookie";
 
 export default async function handler(req, res) {
   const code = req.query.code;
+  if (!code) return res.status(400).send("No code");
+
   const data = new URLSearchParams({
     client_id: process.env.DISCORD_CLIENT_ID,
     client_secret: process.env.DISCORD_CLIENT_SECRET,
     grant_type: "authorization_code",
     code,
-    redirect_uri: `${process.env.BASE_URL}/api/callback`,
+    redirect_uri: process.env.DISCORD_REDIRECT_URI,
     scope: "identify",
   });
 
-  const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
-    method: "POST",
-    body: data,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  });
+  try {
+    const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
+      method: "POST",
+      body: data,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    const tokenJson = await tokenRes.json();
+    const userRes = await fetch("https://discord.com/api/users/@me", {
+      headers: { Authorization: `Bearer ${tokenJson.access_token}` },
+    });
+    const user = await userRes.json();
 
-  const token = await tokenResponse.json();
-  const userResponse = await fetch("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${token.access_token}` },
-  });
-  const user = await userResponse.json();
+    // Solo tu ID puede modificar
+    if (user.id !== process.env.ADMIN_DISCORD_ID) {
+      return res.status(403).send("No autorizado");
+    }
 
-  // Guardamos el usuario en una cookie sencilla (no sensible)
-  res.setHeader(
-    "Set-Cookie",
-    `discord_user=${encodeURIComponent(JSON.stringify(user))}; Path=/; HttpOnly`
-  );
+    // Guardamos cookie de sesión
+    res.setHeader("Set-Cookie", cookie.serialize("discord_id", user.id, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7 // 7 días
+    }));
 
-  res.redirect("/");
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error en callback");
+  }
 }
