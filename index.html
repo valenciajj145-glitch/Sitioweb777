@@ -1,174 +1,142 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contador de Capítulos</title>
+  <meta charset="UTF-8">
+  <title>Mi Contador de Capítulos</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #f3f4f6, #ffffff);
-      color: #333;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      padding: 50px;
     }
 
-    header {
+    #loginBtn a {
       position: absolute;
-      top: 15px;
-      right: 25px;
-    }
-
-    #login {
-      padding: 8px 14px;
-      background-color: #5865f2;
+      top: 20px;
+      right: 20px;
+      text-decoration: none;
+      background: #7289da;
       color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.95em;
-      transition: 0.2s;
-    }
-
-    #login:hover {
-      background-color: #4752c4;
-    }
-
-    #user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #f1f5f9;
-      padding: 6px 12px;
-      border-radius: 8px;
-    }
-
-    #user-info img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-    }
-
-    h1 {
-      font-size: 2em;
-      margin-bottom: 0.5em;
-      text-align: center;
-    }
-
-    #contador {
-      font-size: 3em;
-      margin: 0.3em 0;
+      padding: 10px 20px;
+      border-radius: 5px;
       font-weight: bold;
     }
 
-    #controls {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 10px;
+    #contador {
+      text-align: center;
+      margin-top: 50px;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
-    button.action {
-      padding: 10px 18px;
-      margin: 5px;
+    #contador button {
+      font-size: 24px;
+      padding: 10px 20px;
+      margin: 0 20px;
       border: none;
-      border-radius: 8px;
-      background-color: #4f46e5;
+      border-radius: 5px;
+      background: #7289da;
       color: white;
-      font-size: 1em;
       cursor: pointer;
       transition: 0.2s;
     }
 
-    button.action:hover {
-      background-color: #4338ca;
+    #contador button:hover {
+      background: #5b6eae;
+    }
+
+    #count {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 0 15px;
+    }
+
+    #username {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <button id="login">Iniciar sesión con Discord</button>
-    <div id="user-info" style="display: none;"></div>
-  </header>
 
-  <h1>Capítulos Leídos</h1>
-  <div id="contador">0</div>
+  <!-- Botón de login -->
+  <div id="loginBtn">
+    <a href="/api/login">Login con Discord</a>
+  </div>
 
-  <div id="controls">
-    <button class="action" id="sumar">+1 Capítulo</button>
-    <button class="action" id="reiniciar">Reiniciar</button>
+  <!-- Contador -->
+  <div id="contador" style="display:none;">
+    <span id="username"></span>
+    <div>
+      <button onclick="updateCounter(-1)">-</button>
+      <span id="count">0</span>
+      <button onclick="updateCounter(1)">+</button>
+    </div>
   </div>
 
   <script>
-    // Tu dominio fijo (corrige el error redirect_uri)
-    const baseUrl = "https://sitioweb777.vercel.app";
-
-    async function cargarContador() {
-      const res = await fetch(`${baseUrl}/api/load`);
-      const data = await res.json();
-      document.getElementById("contador").textContent = data.capitulos ?? 0;
-    }
-
-    async function verificarSesion() {
+    // Chequea si estás logueado
+    async function checkLogin() {
       try {
-        const res = await fetch(`${baseUrl}/api/me`);
+        const res = await fetch("/api/me");
         const data = await res.json();
-        const loginBtn = document.getElementById("login");
-        const userDiv = document.getElementById("user-info");
-        const controls = document.getElementById("controls");
 
-        if (data && data.logged) {
-          loginBtn.style.display = "none";
-          userDiv.style.display = "flex";
-          controls.style.display = "flex";
-
-          userDiv.innerHTML = `
-            <img src="${data.avatar}" alt="avatar">
-            <span>${data.username}</span>
-          `;
+        if (data.logged) {
+          document.getElementById("loginBtn").style.display = "none";
+          document.getElementById("contador").style.display = "block";
+          document.getElementById("username").textContent = data.username;
+          loadCounter();
         } else {
-          loginBtn.style.display = "block";
-          userDiv.style.display = "none";
-          controls.style.display = "none";
+          document.getElementById("loginBtn").style.display = "block";
+          document.getElementById("contador").style.display = "none";
         }
       } catch (err) {
-        console.error("Error verificando sesión:", err);
+        console.error(err);
       }
     }
 
-    document.getElementById("login").onclick = () => {
-      window.location.href = `${baseUrl}/api/login`;
-    };
+    // Carga el contador desde el backend
+    async function loadCounter() {
+      try {
+        const res = await fetch("/api/load");
+        const data = await res.json();
+        document.getElementById("count").textContent = data.capitulos;
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
-    document.getElementById("sumar").onclick = async () => {
-      let valor = parseInt(document.getElementById("contador").textContent);
-      valor++;
-      document.getElementById("contador").textContent = valor;
-      await fetch(`${baseUrl}/api/save`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ capitulos: valor }),
-      });
-    };
+    // Actualiza el contador (solo para admin)
+    async function updateCounter(delta) {
+      try {
+        const countEl = document.getElementById("count");
+        let newCount = parseInt(countEl.textContent) + delta;
 
-    document.getElementById("reiniciar").onclick = async () => {
-      if (confirm("¿Reiniciar a 0 capítulos?")) {
-        document.getElementById("contador").textContent = "0";
-        await fetch(`${baseUrl}/api/save`, {
+        const res = await fetch("/api/save", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ capitulos: 0 }),
+          body: JSON.stringify({ capitulos: newCount })
         });
-      }
-    };
 
-    cargarContador();
-    verificarSesion();
+        if (res.ok) {
+          countEl.textContent = newCount;
+        } else {
+          const text = await res.text();
+          alert("Error: " + text);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Inicializa al cargar la página
+    checkLogin();
   </script>
 </body>
 </html>
