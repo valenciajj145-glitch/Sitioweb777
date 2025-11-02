@@ -1,34 +1,45 @@
-import fetch from "node-fetch";
 import cookie from "cookie";
-
-console.log("CLIENT_ID:", process.env.DISCORD_CLIENT_ID);
-console.log("CLIENT_SECRET:", process.env.DISCORD_CLIENT_SECRET ? "ok" : "missing");
-console.log("REDIRECT_URI:", process.env.DISCORD_REDIRECT_URI);
-console.log("ADMIN_ID:", process.env.ADMIN_DISCORD_ID);
 
 export default async function handler(req, res) {
   const code = req.query.code;
   if (!code) return res.status(400).send("No code");
 
-  const data = new URLSearchParams({
-    client_id: process.env.DISCORD_CLIENT_ID,
-    client_secret: process.env.DISCORD_CLIENT_SECRET,
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: process.env.DISCORD_REDIRECT_URI,
-    scope: "identify",
-  });
-
   try {
+    // Token exchange
+    const data = new URLSearchParams({
+      client_id: process.env.DISCORD_CLIENT_ID,
+      client_secret: process.env.DISCORD_CLIENT_SECRET,
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: process.env.DISCORD_REDIRECT_URI,
+      scope: "identify",
+    });
+
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
       body: data,
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
+
+    if (!tokenRes.ok) {
+      const text = await tokenRes.text();
+      console.error("Token error:", text);
+      return res.status(500).send("Error obteniendo token");
+    }
+
     const tokenJson = await tokenRes.json();
+
+    // Obtener info del usuario
     const userRes = await fetch("https://discord.com/api/users/@me", {
       headers: { Authorization: `Bearer ${tokenJson.access_token}` },
     });
+
+    if (!userRes.ok) {
+      const text = await userRes.text();
+      console.error("User info error:", text);
+      return res.status(500).send("Error obteniendo usuario");
+    }
+
     const user = await userRes.json();
 
     // Solo tu ID puede modificar
@@ -36,12 +47,15 @@ export default async function handler(req, res) {
       return res.status(403).send("No autorizado");
     }
 
-    // Guardamos cookie de sesión
-    res.setHeader("Set-Cookie", cookie.serialize("discord_id", user.id, {
-      httpOnly: true,
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7 // 7 días
-    }));
+    // Guardar cookie
+    res.setHeader(
+      "Set-Cookie",
+      cookie.serialize("discord_id", user.id, {
+        httpOnly: true,
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7 días
+      })
+    );
 
     res.redirect("/");
   } catch (err) {
