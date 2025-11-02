@@ -3,133 +3,172 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Capitulos que mack ha leido xd</title>
+  <title>Contador de Capítulos</title>
   <style>
-    :root {
-      --bg: #f4f6fb;
-      --card: #fff;
-      --accent: #5865F2;
-      --text: #222;
-      --shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
     body {
-      font-family: "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #f3f4f6, #ffffff);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      margin: 0;
     }
 
-    h1 {
-      margin-bottom: 0.5rem;
-      font-size: 2rem;
-      color: var(--accent);
+    header {
+      position: absolute;
+      top: 15px;
+      right: 25px;
     }
 
-    .card {
-      background: var(--card);
-      box-shadow: var(--shadow);
-      border-radius: 16px;
-      padding: 2rem;
-      text-align: center;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    .contador {
-      font-size: 2rem;
-      margin: 1.5rem 0;
-      font-weight: bold;
-    }
-
-    button {
-      margin: 8px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background: var(--accent);
+    #login {
+      padding: 8px 14px;
+      background-color: #5865f2;
       color: white;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 0.95em;
       transition: 0.2s;
     }
 
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(88,101,242,0.3);
+    #login:hover {
+      background-color: #4752c4;
     }
 
-    footer {
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      color: #777;
+    #user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    #user-info img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+      text-align: center;
+    }
+
+    #contador {
+      font-size: 3em;
+      margin: 0.3em 0;
+      font-weight: bold;
+    }
+
+    #controls {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    button.action {
+      padding: 10px 18px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4f46e5;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button.action:hover {
+      background-color: #4338ca;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Contador de capítulos</h1>
-    <p class="contador">Has leído <span id="count">0</span> capítulos.</p>
+  <header>
+    <button id="login">Iniciar sesión con Discord</button>
+    <div id="user-info" style="display: none;"></div>
+  </header>
 
-    <button id="add">+1 Capítulo</button>
-    <button id="reset">Reiniciar</button>
-    <hr style="margin: 1.5rem 0; opacity: 0.3;">
-    <button id="login">Login con Discord</button>
+  <h1>📚 Capítulos Leídos</h1>
+  <div id="contador">0</div>
+
+  <div id="controls">
+    <button class="action" id="sumar">+1 Capítulo</button>
+    <button class="action" id="reiniciar">Reiniciar</button>
   </div>
 
-  <footer>waos</footer>
-
   <script>
-    let count = 0;
+    // Tu dominio fijo (corrige el error redirect_uri)
+    const baseUrl = "https://sitioweb777.vercel.app";
 
-    async function load() {
+    async function cargarContador() {
+      const res = await fetch(`${baseUrl}/api/load`);
+      const data = await res.json();
+      document.getElementById("contador").textContent = data.capitulos ?? 0;
+    }
+
+    async function verificarSesion() {
       try {
-        const res = await fetch("/api/load");
-        if (!res.ok) throw new Error("No se pudo cargar");
+        const res = await fetch(`${baseUrl}/api/me`);
         const data = await res.json();
-        count = data.count || 0;
-        document.getElementById("count").textContent = count;
-      } catch (e) {
-        console.error(e);
+        const loginBtn = document.getElementById("login");
+        const userDiv = document.getElementById("user-info");
+        const controls = document.getElementById("controls");
+
+        if (data && data.logged) {
+          loginBtn.style.display = "none";
+          userDiv.style.display = "flex";
+          controls.style.display = "flex";
+
+          userDiv.innerHTML = `
+            <img src="${data.avatar}" alt="avatar">
+            <span>${data.username}</span>
+          `;
+        } else {
+          loginBtn.style.display = "block";
+          userDiv.style.display = "none";
+          controls.style.display = "none";
+        }
+      } catch (err) {
+        console.error("Error verificando sesión:", err);
       }
     }
-
-    async function save() {
-      try {
-        await fetch("/api/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ count }),
-        });
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    document.getElementById("add").onclick = async () => {
-      count++;
-      document.getElementById("count").textContent = count;
-      await save();
-    };
-
-    document.getElementById("reset").onclick = async () => {
-      if (confirm("¿Seguro que quieres reiniciar el contador?")) {
-        count = 0;
-        document.getElementById("count").textContent = count;
-        await save();
-      }
-    };
 
     document.getElementById("login").onclick = () => {
-      window.location.href = "/api/login";
+      window.location.href = `${baseUrl}/api/login`;
     };
 
-    load();
+    document.getElementById("sumar").onclick = async () => {
+      let valor = parseInt(document.getElementById("contador").textContent);
+      valor++;
+      document.getElementById("contador").textContent = valor;
+      await fetch(`${baseUrl}/api/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ capitulos: valor }),
+      });
+    };
+
+    document.getElementById("reiniciar").onclick = async () => {
+      if (confirm("¿Reiniciar a 0 capítulos?")) {
+        document.getElementById("contador").textContent = "0";
+        await fetch(`${baseUrl}/api/save`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ capitulos: 0 }),
+        });
+      }
+    };
+
+    cargarContador();
+    verificarSesion();
   </script>
 </body>
 </html>
