@@ -1,8 +1,135 @@
-<html>
-  <head>
-    <meta charset="UTF-8">
-  </head>
-    <body>
-      <h1>Hello</h1>
-    </body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capitulos que mack ha leido xd</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #fff;
+      --accent: #5865F2;
+      --text: #222;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+      color: var(--accent);
+    }
+
+    .card {
+      background: var(--card);
+      box-shadow: var(--shadow);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .contador {
+      font-size: 2rem;
+      margin: 1.5rem 0;
+      font-weight: bold;
+    }
+
+    button {
+      margin: 8px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(88,101,242,0.3);
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Contador de capítulos</h1>
+    <p class="contador">Has leído <span id="count">0</span> capítulos.</p>
+
+    <button id="add">+1 Capítulo</button>
+    <button id="reset">Reiniciar</button>
+    <hr style="margin: 1.5rem 0; opacity: 0.3;">
+    <button id="login">Login con Discord</button>
+  </div>
+
+  <footer>waos</footer>
+
+  <script>
+    let count = 0;
+
+    async function load() {
+      try {
+        const res = await fetch("/api/load");
+        if (!res.ok) throw new Error("No se pudo cargar");
+        const data = await res.json();
+        count = data.count || 0;
+        document.getElementById("count").textContent = count;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function save() {
+      try {
+        await fetch("/api/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ count }),
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    document.getElementById("add").onclick = async () => {
+      count++;
+      document.getElementById("count").textContent = count;
+      await save();
+    };
+
+    document.getElementById("reset").onclick = async () => {
+      if (confirm("¿Seguro que quieres reiniciar el contador?")) {
+        count = 0;
+        document.getElementById("count").textContent = count;
+        await save();
+      }
+    };
+
+    document.getElementById("login").onclick = () => {
+      window.location.href = "/api/login";
+    };
+
+    load();
+  </script>
+</body>
 </html>
