@@ -5,13 +5,13 @@ export default async function handler(req, res) {
   try {
     // Intercambiar código por token
     const data = new URLSearchParams({
-      client_id: process.env.DISCORD_CLIENT_ID,
-      client_secret: process.env.DISCORD_CLIENT_SECRET,
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: process.env.DISCORD_REDIRECT_URI,
-      scope: "identify",
-    });
+  client_id: process.env.DISCORD_CLIENT_ID,
+  client_secret: process.env.DISCORD_CLIENT_SECRET,
+  grant_type: "authorization_code",
+  code,
+  redirect_uri: process.env.DISCORD_REDIRECT_URI
+});
+
 
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
